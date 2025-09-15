@@ -1,0 +1,51 @@
+### Create facility
+POST http://localhost:3001/facilities
+Content-Type: application/json
+
+{
+  "ownerId": "owner_1",
+  "name": "Rizal Memorial Courts",
+  "address": "Pablo Ocampo Sr. St, Malate, Manila",
+  "lat": 14.5636,
+  "lng": 120.9946
+}
+
+### Create court
+POST http://localhost:3001/facilities/courts
+Content-Type: application/json
+
+{
+  "facilityId": "<FACILITY_ID>",
+  "sport": "basketball",
+  "hourlyPrice": 8000
+}
+
+### Search nearby
+GET http://localhost:3001/facilities/nearby?lat=14.56&lng=121.00&radius=8000
+
+### Hold a slot
+POST http://localhost:3001/bookings/hold
+Content-Type: application/json
+
+{
+  "slotId": "<SLOT_ID>",
+  "userId": "user_123"
+}
+
+### Create booking
+POST http://localhost:3001/bookings
+Content-Type: application/json
+
+{
+  "slotId": "<SLOT_ID>",
+  "userId": "user_123",
+  "amount": 12000
+}
+
+### Create checkout (PayMongo)
+POST http://localhost:3001/payments/checkout
+Content-Type: application/json
+
+{
+  "bookingId": "<BOOKING_ID>"
+}

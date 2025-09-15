@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("player") // player | owner | admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // back-relations
+  bookings   Booking[]
+  facilities Facility[] // <— back relation for Facility.owner
+}
+
+model Facility {
+  id        String   @id @default(cuid())
+  ownerId   String
+  name      String
+  address   String
+  lat       Float
+  lng       Float
+  imageUrl  String?            // <— NEW (optional)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User     @relation(fields: [ownerId], references: [id])
+  courts  Court[]
+
+  @@index([lat, lng])
+}
+
+
+model Court {
+  id          String   @id @default(cuid())
+  facilityId  String
+  sport       String
+  surface     String?
+  hourlyPrice Int // cents
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  facility  Facility   @relation(fields: [facilityId], references: [id])
+  timeSlots TimeSlot[]
+  bookings  Booking[] // <— back relation for Booking.court
+}
+
+model TimeSlot {
+  id        String   @id @default(cuid())
+  courtId   String
+  startAt   DateTime
+  endAt     DateTime
+  status    String   @default("open") // open | held | booked
+  heldBy    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  court   Court    @relation(fields: [courtId], references: [id])
+  booking Booking?
+
+  @@index([courtId, startAt, endAt, status])
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  userId    String
+  courtId   String
+  slotId    String   @unique
+  amount    Int
+  status    String   @default("pending") // pending | paid | cancelled | refunded
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id])
+  court   Court    @relation(fields: [courtId], references: [id])
+  slot    TimeSlot @relation(fields: [slotId], references: [id])
+  payment Payment?
+}
+
+model Payment {
+  id         String   @id @default(cuid())
+  bookingId  String   @unique
+  provider   String
+  providerId String?
+  method     String?
+  status     String   @default("created")
+  rawPayload Json?
+  createdAt  DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}

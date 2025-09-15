@@ -1,0 +1,12 @@
+{
+  "name": "playkorte",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "echo \"Build from individual apps\"",
+    "dev": "echo \"Run apps individually\""
+  }
+}
